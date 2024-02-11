@@ -59,9 +59,10 @@ pipeline {
             steps {
                 // Checkout your source code
                 checkout scm
+                docker build -t samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER} .
                 // Build Docker image
                 // script {
-                docker.build("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}")
+                // docker.build("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}")
                 // }
             }
         }
