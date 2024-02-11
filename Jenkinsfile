@@ -89,10 +89,10 @@ pipeline {
                     sshagent(credentials: ['3.237.84.237']) {
                         // SSH into remote server and run Docker commands
                         sh '''
-                            ssh ec2-user@3.237.84.237 'docker pull samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}'
-                            ssh ec2-user@3.237.84.237 'docker stop springbootproject'
-                            ssh ec2-user@3.237.84.237 'docker rm springbootproject'
-                            ssh ec2-user@3.237.84.237 'docker run --restart always --name springbootproject -p 8080:8080 -d samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}'
+                            ssh ubuntu@52.207.81.94 'docker pull samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}'
+                            ssh ubuntu@52.207.81.94 'docker stop springbootproject'
+                            ssh ubuntu@52.207.81.94 'docker rm springbootproject'
+                            ssh ubuntu@52.207.81.94 'docker run --restart always --name springbootproject -p 8080:8080 -d samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}'
                         '''
                     }
                 }
