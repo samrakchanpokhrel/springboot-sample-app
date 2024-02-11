@@ -58,11 +58,7 @@ pipeline {
             }
             steps {
                 echo 'Starting to build docker image'
-
-                script {
-                  docker.build("samrakchanpokhrel/springbootproject:dev")
-                    
-                }
+                sh 'docker build -t samrakchanpokhrel/springbootproject:latest .'
             }
             // steps {
             //     // Checkout your source code
