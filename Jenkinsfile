@@ -6,11 +6,12 @@ pipeline {
                 branch 'master'
             }
             steps {
+                // Checkout your source code
+                checkout scm
+                
+                // Build Docker image
                 script {
-                    app = docker.build("samrakchanpokhrel/springbootproject")
-                    app.inside {
-                        sh 'echo $(curl localhost:8080)'
-                    }
+                    docker.build("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}")
                 }
             }
         }
@@ -21,8 +22,9 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
+                        // Push Docker image to Docker Hub
+                        docker.image("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}").push()
+                    }
                     }
                 }
             }
