@@ -50,7 +50,7 @@
 //         }
 //     }
 pipeline {
-    agent any
+    agent { dockerfile true }
     stages {
         stage('Build Docker Image') {
             when {
@@ -59,11 +59,10 @@ pipeline {
             steps {
                 // Checkout your source code
                 checkout scm
-                
                 // Build Docker image
-                script {
-                    docker.build("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}")
-                }
+                // script {
+                docker.build("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}")
+                // }
             }
         }
         stage('Push Docker Image') {
