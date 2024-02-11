@@ -1,103 +1,34 @@
-// pipeline {
-//     agent any
-//     stages {
-//         stage('Build Docker Image') {
-//             when {
-//                 branch 'master'
-//             }
-//             steps {
-//                 // Checkout your source code
-//                 checkout scm
-                
-//                 // Build Docker image
-//                 script {
-//                     docker.build("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}")
-//                 }
-//             }
-//         }
-//         stage('Push Docker Image') {
-//             when {
-//                 branch 'master'
-//             }
-//             steps {
-//                 script {
-//                     docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
-//                         // Push Docker image to Docker Hub
-//                         docker.image("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}").push()
-//                     }
-//                     }
-//                 }
-//             }
-//         }
-//         stage('DeployToProduction') {
-//             when {
-//                 branch 'master'
-//             }
-//             steps {
-//                 script {
-//                     // Use SSH agent credentials configured in Jenkins
-//                     sshagent(credentials: ['3.237.84.237']) {
-//                         // SSH into remote server and run Docker commands
-//                         sh '''
-//                             ssh ec2-user@3.237.84.237 'docker pull samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}'
-//                             ssh ec2-user@3.237.84.237 'docker stop springbootproject'
-//                             ssh ec2-user@3.237.84.237 'docker rm springbootproject'
-//                             ssh ec2-user@3.237.84.237 'docker run --restart always --name train-schedule -p 8080:8080 -d samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}'
-//                         '''
-//                     }
-//                 }
-//             }
-//         }
-//     }
 pipeline {
     agent any
+    
+    environment {
+        DOCKER_REGISTRY_CREDENTIALS = 'docker_hub_login'
+        DOCKER_IMAGE_NAME = 'samrakchanpokhrel/springbootproject'
+        DOCKERFILE_PATH = 'Dockerfile'
+    }
+
     stages {
-        stage('Build Docker Image') {
-            when {
-                branch 'master'
-            }
+        stage('Clone Repository') {
             steps {
-                echo 'Starting to build docker image'
-                sh 'docker build -t samrakchanpokhrel/springbootproject:latest .'
+                git 'https://github.com/samrakchanpokhrel/springboot-sample-app.git'
             }
-            // steps {
-            //     // Checkout your source code
-            //     checkout scm
-            //     docker build -t samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER} .
-            //     // Build Docker image
-            //     // script {
-            //     // docker.build("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}")
-            //     // }
-            // }
         }
-        stage('Push Docker Image') {
-            when {
-                branch 'master'
-            }
+
+        stage('Build Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker_hub_login') {
-                        // Push Docker image to Docker Hub
-                        docker.image("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}").push()
-                    }
+                    docker.build("${DOCKER_IMAGE_NAME}", "--file ${DOCKERFILE_PATH} .")
                 }
             }
         }
-        stage('DeployToProduction') {
-            when {
-                branch 'master'
-            }
+
+        stage('Push Docker Image') {
             steps {
                 script {
-                    // Use SSH agent credentials configured in Jenkins
-                    sshagent(credentials: ['3.237.84.237']) {
-                        // SSH into remote server and run Docker commands
-                        sh '''
-                            ssh ubuntu@52.207.81.94 'docker pull samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}'
-                            ssh ubuntu@52.207.81.94 'docker stop springbootproject'
-                            ssh ubuntu@52.207.81.94 'docker rm springbootproject'
-                            ssh ubuntu@52.207.81.94 'docker run --restart always --name springbootproject -p 8080:8080 -d samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}'
-                        '''
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_REGISTRY_CREDENTIALS}", usernameVariable: 'DOCKER_REGISTRY_USERNAME', passwordVariable: 'DOCKER_REGISTRY_PASSWORD')]) {
+                        docker.withRegistry('https://your-docker-registry.com', "${DOCKER_REGISTRY_USERNAME}", "${DOCKER_REGISTRY_PASSWORD}") {
+                            docker.image("${DOCKER_IMAGE_NAME}").push()
+                        }
                     }
                 }
             }
