@@ -57,14 +57,22 @@ pipeline {
                 branch 'master'
             }
             steps {
-                // Checkout your source code
-                checkout scm
-                docker build -t samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER} .
-                // Build Docker image
-                // script {
-                // docker.build("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}")
-                // }
+                echo 'Starting to build docker image'
+
+                script {
+                    def customImage = docker.build("samrakchanpokhrel/springbootproject:${env.BUILD_ID}")
+                    customImage.push()
+                }
             }
+            // steps {
+            //     // Checkout your source code
+            //     checkout scm
+            //     docker build -t samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER} .
+            //     // Build Docker image
+            //     // script {
+            //     // docker.build("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}")
+            //     // }
+            // }
         }
         stage('Push Docker Image') {
             when {
