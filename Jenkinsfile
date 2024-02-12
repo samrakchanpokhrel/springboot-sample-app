@@ -25,7 +25,6 @@ pipeline {
                         // Push Docker image to Docker Hub
                         docker.image("samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}").push()
                     }
-                    }
                 }
             }
         }
@@ -35,17 +34,23 @@ pipeline {
             }
             steps {
                 script {
+                    def prod_ip = 'production_ip'
+                    def username = 'ssh_username'
+
                     // Use SSH agent credentials configured in Jenkins
-                    sshagent(credentials: ['3.237.84.237']) {
+                    sshagent(credentials: ['ssh_cred']) {
                         // SSH into remote server and run Docker commands
-                        sh '''
-                            ssh ec2-user@3.237.84.237 'docker pull samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}'
-                            ssh ec2-user@3.237.84.237 'docker stop springbootproject'
-                            ssh ec2-user@3.237.84.237 'docker rm springbootproject'
-                            ssh ec2-user@3.237.84.237 'docker run --restart always --name train-schedule -p 8080:8080 -d samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}'
-                        '''
+                        sh """
+                            ssh ${username}@${prod_ip} '
+                                docker pull samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER} &&
+                                docker stop springbootproject &&
+                                docker rm springbootproject &&
+                                docker run --restart always --name springbootproject -p 8080:8080 -d samrakchanpokhrel/springbootproject:${env.BUILD_NUMBER}
+                            '
+                        """
                     }
                 }
             }
         }
     }
+}
