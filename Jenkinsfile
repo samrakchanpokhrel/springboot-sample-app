@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build Docker Image') {
             when {
-                branch 'master'
+                branch 'dev'
             }
             steps {
                 // Checkout your source code
@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Push Docker Image') {
             when {
-                branch 'master'
+                branch 'dev'
             }
             steps {
                 script {
@@ -31,7 +31,7 @@ pipeline {
         }
         stage('DeployToProduction') {
             when {
-                branch 'master'
+                branch 'dev'
             }
             steps {
                 script {
